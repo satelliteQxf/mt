@@ -25,7 +25,7 @@ e_count = defaultdict(float)
 for(n,(f,e)) in enumerate(bitext):
   for f_i in set(f):
     for e_j in set(e):
-      theta[(f_i,e_j)] += 1
+      theta[(f_i,e_j)] = 1
 
 for i in range(0,k):
   #E step
