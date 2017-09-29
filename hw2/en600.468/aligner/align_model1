@@ -16,7 +16,7 @@ e_data = "%s.%s" % (opts.train, opts.english)
 sys.stderr.write("Training with Dice's coefficient...")
 bitext = [[sentence.strip().split() for sentence in pair] for pair in zip(open(f_data), open(e_data))[:opts.num_sents]]
 
-k = 10
+k = 5
 theta = defaultdict(float)
 fe_count = defaultdict(float)
 e_count = defaultdict(float)
@@ -44,8 +44,6 @@ for i in range(0,k):
   #M step
   for (k,(f_i,e_j)) in enumerate(fe_count.keys()):
     theta[(f_i,e_j)] = fe_count[(f_i,e_j)] / e_count[e_j]
-    if k % 500 == 0:
-      sys.stderr.write(".")
 # f_count = defaultdict(int)
 # e_count = defaultdict(int)
 # fe_count = defaultdict(int)
@@ -67,8 +65,12 @@ for i in range(0,k):
 # sys.stderr.write("\n")
 
 for (f, e) in bitext:
-  for (i, f_i) in enumerate(f): 
+  for (i, f_i) in enumerate(f):
+    best_p = 0
+    best_j = 0
     for (j, e_j) in enumerate(e):
-      if theta[(f_i,e_j)] >= opts.threshold:
-        sys.stdout.write("%i-%i " % (i,j))
+      if theta[(f_i,e_j)] >= best_p:
+        best_p = theta[(f_i,e_j)]
+        best_j = j
+    sys.stdout.write("%i-%i " % (i,best_j))
   sys.stdout.write("\n")
