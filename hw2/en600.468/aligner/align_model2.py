@@ -44,9 +44,9 @@ trans_prob = ibm_model1.get_theta()
 
 #initialize theta_0
 for(n,(f,e)) in enumerate(bitext):
-  for e_j in set(e):
-    for f_i in set(f):
-      align_prob[(e_j,f_i,len(e),len(f))] = 1.0 / len(f)
+  for (j,e_j) in enumerate(e):
+    for (i,f_i) in enumerate(f):
+      align_prob[(j,i,len(e),len(f))] = 1.0 / len(f)
 
 for i in range(0,k):
   ef_count = defaultdict(float)
@@ -60,20 +60,20 @@ for i in range(0,k):
     m = len(f)
 
     #E step: first step, count the normalization
-    for e_j in set(e):
+    for (j,e_j) in enumerate(e):
       Z[e_j] = 0.0
-      for f_i in set(f):
-        Z[e_j] += trans_prob[(e_j,f_i)] * align_prob[(e_j,f_i,l,m)]
+      for (i,f_i) in enumerate(f):
+        Z[e_j] += trans_prob[(e_j,f_i)] * align_prob[(j,i,l,m)]
 
     #E step: second step, get real count
-    for e_j in set(e):
-      for f_i in set(f):
-        this_count = trans_prob[(e_j,f_i)] * align_prob[(e_j,f_i,l,m)]
+    for (j,e_j) in enumerate(e):
+      for (i,f_i) in enumerate(f):
+        this_count = trans_prob[(e_j,f_i)] * align_prob[(j,i,l,m)]
         this_count_after_normalized = this_count / Z[e_j]
         ef_count[(e_j,f_i)] += this_count_after_normalized
         f_count[f_i] += this_count_after_normalized
-        align_count[(e_j,f_i,l,m)] += this_count_after_normalized
-        align_count_given_i[(e_j,l,m)] += this_count_after_normalized
+        align_count[(j,i,l,m)] += this_count_after_normalized
+        align_count_given_i[(j,l,m)] += this_count_after_normalized
 
   #M step: first step, update the translate probability
   for (k,(e_j,f_i)) in enumerate(trans_prob.keys()):
@@ -83,9 +83,9 @@ for i in range(0,k):
   for(n,(f,e)) in enumerate(bitext):
     l = len(e)
     m = len(f)
-    for e_j in set(e):
-      for f_i in set(f):
-        align_prob[(e_j,f_i,l,m)] = align_count[(e_j,f_i,l,m)] / align_count_given_i[(e_j,l,m)]
+    for (j,e_j) in enumerate(e):
+      for (i,f_i) in enumerate(f):
+        align_prob[(j,i,l,m)] = align_count[(j,i,l,m)] / align_count_given_i[(j,l,m)]
 
 for (f, e) in bitext:
   l = len(e)
@@ -94,7 +94,7 @@ for (f, e) in bitext:
     best_p = 0
     best_i = 0
     for (i, f_i) in enumerate(f):
-      curr_prob = trans_prob[(e_j,f_i)] * align_prob[(e_j,f_i,l,m)]
+      curr_prob = trans_prob[(e_j,f_i)] * align_prob[(j,i,l,m)]
       if curr_prob >= best_p:
         best_p = curr_prob
         best_i = i
