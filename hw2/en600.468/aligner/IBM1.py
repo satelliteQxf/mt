@@ -24,21 +24,21 @@ class IBM1:
 
 
   def __init__(self, bitext):
-    self.setup(bitext)
+    self.bitext = bitext
     self.theta = self.train()
 
 
-  def setup(self, bitext): # setup stemmer
-    eng_stemmer = SnowballStemmer("english")
-    frn_stemmer = SnowballStemmer("french")
-    stem_bitext = []
+  # def setup(self, bitext): # setup stemmer
+  #   eng_stemmer = SnowballStemmer("english")
+  #   frn_stemmer = SnowballStemmer("french")
+  #   stem_bitext = []
 
-    for (n,(f,e)) in enumerate(bitext):
-      eng_stem = [frn_stemmer.stem(w) for w in e]
-      frn_stem = [eng_stemmer.stem(w.decode("utf-8")) for w in f]
-      stem_bitext.append([frn_stem, eng_stem])
+  #   for (n,(f,e)) in enumerate(bitext):
+  #     eng_stem = [frn_stemmer.stem(w) for w in e]
+  #     frn_stem = [eng_stemmer.stem(w.decode("utf-8")) for w in f]
+  #     stem_bitext.append([frn_stem, eng_stem])
 
-    self.bitext = stem_bitext
+  #   self.bitext = stem_bitext
 
   def train(self): # return theta
     k = 10
