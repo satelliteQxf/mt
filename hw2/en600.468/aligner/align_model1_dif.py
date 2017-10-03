@@ -2,6 +2,9 @@
 import optparse
 import sys
 from collections import defaultdict
+from nltk.stem import SnowballStemmer
+reload(sys)
+sys.setdefaultencoding("latin-1")
 
 optparser = optparse.OptionParser()
 optparser.add_option("-d", "--data", dest="train", default="data/hansards", help="Data filename prefix (default=data)")
@@ -15,6 +18,20 @@ e_data = "%s.%s" % (opts.train, opts.english)
 
 sys.stderr.write("Training with Dice's coefficient...")
 bitext = [[sentence.strip().split() for sentence in pair] for pair in zip(open(f_data), open(e_data))[:opts.num_sents]]
+
+
+
+eng_stemmer = SnowballStemmer("english")
+frn_stemmer = SnowballStemmer("french")
+stem_bitext = []
+
+for (n,(f,e)) in enumerate(bitext):
+  eng_stem = [frn_stemmer.stem(word) for word in e]
+  frn_stem = [eng_stemmer.stem(word.decode("utf-8")) for word in f]
+  stem_bitext.append([frn_stem, eng_stem])
+
+bitext = stem_bitext
+
 
 k = 5
 theta = defaultdict(float)

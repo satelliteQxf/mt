@@ -33,7 +33,7 @@ bitext = stem_bitext
 
 k = 5
 theta = defaultdict(float)
-fe_count = defaultdict(float)
+ef_count = defaultdict(float)
 e_count = defaultdict(float)
 
 #initialize theta_0
