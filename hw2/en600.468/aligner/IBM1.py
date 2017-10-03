@@ -41,15 +41,29 @@ class IBM1:
     self.bitext = stem_bitext
 
   def train(self): # return theta
-    k = 5
+    k = 10
     theta = defaultdict(float)
 
 
-    #initialize theta_0
+    # initialize
+    ef_count = defaultdict(float)
+    f_count = defaultdict(float)
     for(n,(f,e)) in enumerate(self.bitext):
       for e_j in set(e):
         for f_i in set(f):
-          theta[(e_j,f_i)] = 1.0 / len(f) 
+          ef_count[(e_j,f_i)] += 1
+          f_count[f_i] += 1
+    for (e_j,f_i) in ef_count:
+      theta[(e_j,f_i)] = ef_count[(e_j,f_i)] / f_count[f_i]
+
+    # for(n,(f,e)) in enumerate(self.bitext):
+    #   for e_j in set(e):
+    #     for f_i in set(f):
+    #       theta[(e_j,f_i)] = 1.0 / len(f) 
+
+
+
+          #/ len(f) 
 
     for i in range(0,k):
       #E step
