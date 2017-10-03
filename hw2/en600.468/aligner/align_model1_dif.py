@@ -18,8 +18,8 @@ bitext = [[sentence.strip().split() for sentence in pair] for pair in zip(open(f
 
 k = 5
 theta = defaultdict(float)
-fe_count = defaultdict(float)
-e_count = defaultdict(float)
+ef_count = defaultdict(float)
+f_count = defaultdict(float)
 
 #initialize theta_0
 for(n,(f,e)) in enumerate(bitext):
@@ -38,7 +38,7 @@ for i in range(0,k):
         Z += theta[(e_j,f_i)]
       for f_i in set(f):
         c = 1.0 * theta[(e_j,f_i)] / Z
-        ef_count[e_j,f_i] += c
+        ef_count[(e_j,f_i)] += c
         f_count[f_i] += c
 
   #M step
