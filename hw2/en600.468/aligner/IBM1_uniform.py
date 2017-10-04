@@ -25,7 +25,7 @@ class IBM1:
     for(n,(f,e)) in enumerate(self.bitext):
       for e_j in set(e):
         for f_i in set(f):
-          theta[(e_j,f_i)] = 1 / len(f)
+          theta[(e_j,f_i)] = 1.0 / len(f)
 
     for i in range(0,k):
       #E step
