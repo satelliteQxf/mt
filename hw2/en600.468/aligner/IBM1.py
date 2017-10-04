@@ -19,7 +19,6 @@ class IBM1:
     theta = defaultdict(float)
 
 
-    #initialize theta_0
     ef_count = defaultdict(float)
     f_count = defaultdict(float)
     for(n,(f,e)) in enumerate(self.bitext):
@@ -29,6 +28,7 @@ class IBM1:
           f_count[f_i] += 1
     for (e_j,f_i) in ef_count:
       theta[(e_j,f_i)] = ef_count[(e_j,f_i)] / f_count[f_i]
+
 
     for i in range(0,k):
       #E step
