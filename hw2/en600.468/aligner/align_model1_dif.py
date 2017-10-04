@@ -39,10 +39,17 @@ ef_count = defaultdict(float)
 f_count = defaultdict(float)
 
 #initialize theta_0
+ef_count = defaultdict(float)
+f_count = defaultdict(float)
 for(n,(f,e)) in enumerate(bitext):
   for e_j in set(e):
     for f_i in set(f):
-      theta[(e_j,f_i)] = 1.0 / len(f) 
+      ef_count[(e_j,f_i)] += 1
+      f_count[f_i] += 1
+for (e_j,f_i) in ef_count:
+  theta[(e_j,f_i)] = ef_count[(e_j,f_i)] / f_count[f_i]
+print theta
+exit()
 
 for i in range(0,k):
   #E step

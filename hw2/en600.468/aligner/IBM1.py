@@ -8,48 +8,27 @@ sys.setdefaultencoding("latin-1")
 
 
 class IBM1:
-  # optparser = optparse.OptionParser()
-  # optparser.add_option("-d", "--data", dest="train", default="data/hansards", help="Data filename prefix (default=data)")
-  # optparser.add_option("-e", "--english", dest="english", default="e", help="Suffix of English filename (default=e)")
-  # optparser.add_option("-f", "--french", dest="french", default="f", help="Suffix of French filename (default=f)")
-  # optparser.add_option("-t", "--threshold", dest="threshold", default=0.5, type="float", help="Threshold for aligning with Dice's coefficient (default=0.5)")
-  # optparser.add_option("-n", "--num_sentences", dest="num_sents", default=sys.maxint, type="int", help="Number of sentences to use for training and alignment")
-  # (opts, _) = optparser.parse_args()
-  # f_data = "%s.%s" % (opts.train, opts.french)
-  # e_data = "%s.%s" % (opts.train, opts.english)
-
-
-  # sys.stderr.write("Training with Dice's coefficient...")
-  # bitext = [[sentence.strip().split() for sentence in pair] for pair in zip(open(f_data), open(e_data))[:opts.num_sents]]
-
 
   def __init__(self, bitext):
     self.bitext = bitext
     self.theta = self.train()
 
 
-  # def setup(self, bitext): # setup stemmer
-  #   eng_stemmer = SnowballStemmer("english")
-  #   frn_stemmer = SnowballStemmer("french")
-  #   stem_bitext = []
-
-  #   for (n,(f,e)) in enumerate(bitext):
-  #     eng_stem = [frn_stemmer.stem(w) for w in e]
-  #     frn_stem = [eng_stemmer.stem(w.decode("utf-8")) for w in f]
-  #     stem_bitext.append([frn_stem, eng_stem])
-
-  #   self.bitext = stem_bitext
-
   def train(self): # return theta
-    k = 5
+    k = 10
     theta = defaultdict(float)
 
 
     #initialize theta_0
+    ef_count = defaultdict(float)
+    f_count = defaultdict(float)
     for(n,(f,e)) in enumerate(self.bitext):
       for e_j in set(e):
         for f_i in set(f):
-          theta[(e_j,f_i)] = 1.0 / len(f) 
+          ef_count[(e_j,f_i)] += 1
+          f_count[f_i] += 1
+    for (e_j,f_i) in ef_count:
+      theta[(e_j,f_i)] = ef_count[(e_j,f_i)] / f_count[f_i]
 
     for i in range(0,k):
       #E step
