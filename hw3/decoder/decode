@@ -37,17 +37,58 @@ for f in french:
   for i, stack in enumerate(stacks[:-1]):
     for h in sorted(stack.itervalues(),key=lambda h: -h.logprob)[:opts.s]: # prune
       for j in xrange(i+1,len(f)+1):
-        if f[i:j] in tm:
-          for phrase in tm[f[i:j]]:
-            logprob = h.logprob + phrase.logprob
-            lm_state = h.lm_state
-            for word in phrase.english.split():
-              (lm_state, word_logprob) = lm.score(lm_state, word)
-              logprob += word_logprob
-            logprob += lm.end(lm_state) if j == len(f) else 0.0
-            new_hypothesis = hypothesis(logprob, lm_state, h, phrase)
-            if lm_state not in stacks[j] or stacks[j][lm_state].logprob < logprob: # second case is recombination
-              stacks[j][lm_state] = new_hypothesis 
+                swap = (f[i+1],) + (f[i],) + f[i+2:j] if len(f[i:j]) >= 2 else ""
+                swap_2 = (f[i+2],) + (f[i],) + (f[i+1],) + f[i+3:j] if len(f[i:j]) >= 3 else ""
+                swap_3 = (f[i+3],) + (f[i],) + (f[i+1],) + (f[i+2],) + f[i+4:j] if len(f[i:j]) >= 4 else ""
+                # improve coding style and add more rules for swapping
+                if f[i:j] in tm:
+                    for phrase in tm[f[i:j]]:
+                        logprob = h.logprob + phrase.logprob
+                        lm_state = h.lm_state
+                        for word in phrase.english.split():
+                            (lm_state, word_logprob) = lm.score(lm_state, word)
+                            logprob += word_logprob
+                        logprob += lm.end(lm_state) if j == len(f) else 0.0
+                        new_hypothesis = hypothesis(logprob, lm_state, h, phrase)
+                        if lm_state not in stacks[j] or stacks[j][lm_state].logprob < logprob: # second case is recombination
+                            stacks[j][lm_state] = new_hypothesis
+
+                if len(swap) != 0 and swap in tm:
+                    for phrase in tm[swap]:
+                        logprob = h.logprob + phrase.logprob
+                        lm_state = h.lm_state
+                        for word in phrase.english.split():
+                            (lm_state, word_logprob) = lm.score(lm_state, word)
+                            logprob += word_logprob
+                        logprob += lm.end(lm_state) if j == len(f) else 0.0
+                        new_hypothesis = hypothesis(logprob, lm_state, h, phrase)
+                        if lm_state not in stacks[j] or stacks[j][lm_state].logprob < logprob: # second case is recombination
+                            stacks[j][lm_state] = new_hypothesis
+
+                if len(swap_2) != 0 and swap_2 in tm:
+                    for phrase in tm[swap_2]:
+                        logprob = h.logprob + phrase.logprob
+                        lm_state = h.lm_state
+                        for word in phrase.english.split():
+                            (lm_state, word_logprob) = lm.score(lm_state, word)
+                            logprob += word_logprob
+                        logprob += lm.end(lm_state) if j == len(f) else 0.0
+                        new_hypothesis = hypothesis(logprob, lm_state, h, phrase)
+                        if lm_state not in stacks[j] or stacks[j][lm_state].logprob < logprob: # second case is recombination
+                            stacks[j][lm_state] = new_hypothesis
+
+                if len(swap_3) != 0 and swap_3 in tm:
+                    for phrase in tm[swap_3]:
+                        logprob = h.logprob + phrase.logprob
+                        lm_state = h.lm_state
+                        for word in phrase.english.split():
+                            (lm_state, word_logprob) = lm.score(lm_state, word)
+                            logprob += word_logprob
+                        logprob += lm.end(lm_state) if j == len(f) else 0.0
+                        new_hypothesis = hypothesis(logprob, lm_state, h, phrase)
+                        if lm_state not in stacks[j] or stacks[j][lm_state].logprob < logprob: # second case is recombination
+                            stacks[j][lm_state] = new_hypothesis
+                  
   winner = max(stacks[-1].itervalues(), key=lambda h: h.logprob)
   def extract_english(h): 
     return "" if h.predecessor is None else "%s%s " % (extract_english(h.predecessor), h.phrase.english)
