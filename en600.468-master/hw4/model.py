@@ -46,21 +46,16 @@ class RNNLM(nn.Module):
     # outlayer_in = H_table.mm(self.weight_o)
     for i in range(sequence_length):
       outlayer_in = H_table[i].mm(self.weight_o) #+ bias_three
-      m = nn.LogSoftmax()
-      # softwax = m(outlayer_in)
-      output[i,:,:] = m(outlayer_in) #torch.log(softwax)
+      # m = nn.LogSoftmax()
+      output[i,:,:] = torch.log(self.softmax(outlayer_in, input_batch))
 
     return output
 
-    
-    # m = nn.LogSoftmax()
-    # return m(outlayer_in)
-
-    # m = nn.LogSoftmax()
-    # return m(outlayer_in)
- 
- 
-
+  def softmax(self, vector):
+    vector = torch.exp(vector)
+    vector_sum = vector.sum(dim=1)
+    expaned_vector = vector_sum.view((vector_sum.size()[0], 1))
+    return vector / expaned_vector
  
 # TODO: Your implementation goes here
 class BiRNNLM(nn.Module):
