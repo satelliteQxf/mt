@@ -122,3 +122,74 @@ class BiRNNLM(nn.Module):
       output[i,:,:] = m(outlayer_in)
 
     return output
+    
+class LSTM(nn.Module):
+  def __init__(self, vocab_size):
+    super(LSTM, self).__init__()
+    #self.lookup = nn.Parameter(torch.randn(vocab_size, 32), requires_grad = True)
+    self.lookup   = nn.Parameter(torch.Tensor(vocab_size, 32).uniform_(-1.0/math.sqrt(32), 1.0/math.sqrt(32)))
+    self.weight_f1 = nn.Linear(48, 1)
+    self.weight_i1 = nn.Linear(48, 1)
+    self.weight_c1 = nn.Linear(48, 16)
+    self.weight_o1 = nn.Linear(48, 1)
+    self.weight_f2 = nn.Linear(48, 1)
+    self.weight_i2 = nn.Linear(48, 1)
+    self.weight_c2 = nn.Linear(48, 16)
+    self.weight_o2 = nn.Linear(48, 1)
+
+    self.output = nn.Linear(32,vocab_size)
+    self.H_f = nn.Parameter(torch.Tensor(16).uniform_(-1.0/math.sqrt(16), 1.0/math.sqrt(16)))
+    self.H_b = nn.Parameter(torch.Tensor(16).uniform_(-1.0/math.sqrt(16), 1.0/math.sqrt(16)))
+    self.sigmoid = nn.Sigmoid()
+    self.tanh = nn.Tanh()
+    # self.lookup = torch.rand(vocab_size, 32)
+ 
+  def forward(self, input_batch):
+    X = self.lookup[input_batch.data,:]
+    sequence_length = input_batch.size()[0]
+    batch_length = input_batch.size()[1]
+    Hf_pre = self.H_f.expand(batch_length, 16)
+    Hb_pre = self.H_b.expand(batch_length, 16)
+
+    H_f_table = Variable(torch.Tensor(sequence_length, batch_length, 16))
+    H_b_table = Variable(torch.Tensor(sequence_length, batch_length, 16))
+    output_table = Variable(torch.Tensor(sequence_length, batch_length, self.lookup.size()[0]), requires_grad = False)
+
+    C_f = nn.Parameter(torch.Tensor(batch_length,16).uniform_(-1.0/math.sqrt(batch_length), 1.0/math.sqrt(batch_length)))
+    for i in range(sequence_length):
+
+      input_x = X[i,:,:]
+      H_f_table[i] = Hf_pre
+      #forward
+
+      f_t = self.sigmoid(self.weight_f1(torch.cat((Hf_pre, input_x),1))).expand_as(C_f)
+      i_t = self.sigmoid(self.weight_i1(torch.cat((Hf_pre, input_x),1))).expand_as(C_f)
+      C_t_hat = self.tanh(self.weight_c1(torch.cat((Hf_pre,input_x),1)))
+      C = f_t * C_f + i_t * C_t_hat
+      C_f = C
+      o_t = self.sigmoid(self.weight_o1(torch.cat((Hf_pre,input_x),1))).expand_as(C_f)
+      H_f_cur = o_t * self.tanh(C)
+      Hf_pre = H_f_cur
+
+    C_b = nn.Parameter(torch.Tensor(batch_length,16).uniform_(-1.0/math.sqrt(batch_length), 1.0/math.sqrt(batch_length)))
+    for i in range(sequence_length-1,-1, -1):
+      input_x = X[i,:,:]
+      H_b_table[i] = Hb_pre
+      #forward
+
+      f_t = self.sigmoid(self.weight_f2(torch.cat((Hb_pre, input_x),1))).expand_as(C_b)
+      i_t = self.sigmoid(self.weight_i2(torch.cat((Hb_pre, input_x),1))).expand_as(C_b)
+      C_t_hat = self.tanh(self.weight_c2(torch.cat((Hb_pre,input_x),1)))
+      C = f_t * C_b + i_t * C_t_hat
+      C_b = C
+      o_t = self.sigmoid(self.weight_o2(torch.cat((Hb_pre,input_x),1))).expand_as(C_b)
+      H_b_cur = o_t * self.tanh(C)
+      Hb_pre = H_b_cur
+
+    total_h = torch.cat((H_f_table, H_b_table), 2)
+    for i in range(len(H_f_table)):
+      outlayer_in = self.output(total_h[i])
+      m = nn.LogSoftmax()
+      output_table[i,:,:] = m(outlayer_in)
+
+    return output_table
